@@ -1,6 +1,6 @@
 /**
  * CoreHandler - Core encryption/decryption logic
- * Ported from Abracadabra's CoreHandler.js
+ * Simplified for debugging - no AES, just mapping
  */
 
 import { Base64 } from 'js-base64';
@@ -149,7 +149,6 @@ export function Dec(
   let OriginalData = Base64.toUint8Array(OriginStr);
 
   if (AdvancedMarker) {
-    // Extract advanced config byte
     let configByte = OriginalData[OriginalData.byteLength - 1];
     OriginalData = OriginalData.slice(0, OriginalData.byteLength - 1);
 
