@@ -185,7 +185,7 @@ function AES_256_CTR_HMAC_SHA256_D(
 
   if (AdvancedEncObj.UsePBKDF2 && !AdvancedEncObj.UseTOTP) {
     for (let i = 0; i < 16; i++) {
-      salt[15 - i] = data.at(data.byteLength - 1 - i)!;
+      salt[15 - i] = data[data.byteLength - 1 - i];
     }
     data = data.subarray(0, data.byteLength - 16);
     const key256Bits = CryptoJS.PBKDF2(key, CryptoJS.lib.WordArray.create(salt), {
@@ -208,7 +208,7 @@ function AES_256_CTR_HMAC_SHA256_D(
   if (AdvancedEncObj.UseHMAC) {
     const HMAC_HASH = new Uint8Array(32);
     for (let i = 0; i < 32; i++) {
-      HMAC_HASH[31 - i] = data.at(data.byteLength - 1 - i)!;
+      HMAC_HASH[31 - i] = data[data.byteLength - 1 - i];
     }
     data = data.subarray(0, data.byteLength - 32);
 
@@ -286,8 +286,8 @@ export function Encrypt(
 export function Decrypt(Data: Uint8Array, key: string, AdvancedEncObj: AdvancedEncConfig | null = null): Uint8Array {
   if (!AdvancedEncObj) {
     const RandomBytes = [0, 0];
-    RandomBytes[1] = Data.at(Data.byteLength - 1)!;
-    RandomBytes[0] = Data.at(Data.byteLength - 2)!;
+    RandomBytes[1] = Data[Data.byteLength - 1];
+    RandomBytes[0] = Data[Data.byteLength - 2];
 
     Data = Data.subarray(0, Data.byteLength - 2);
     Data = AES_256_CTR_E(Data, key, RandomBytes);
@@ -302,8 +302,8 @@ export function Decrypt(Data: Uint8Array, key: string, AdvancedEncObj: AdvancedE
       Data = Data.subarray(0, Data.byteLength - 16);
     } else {
       RandomBytes = [0, 0];
-      RandomBytes[1] = Data.at(Data.byteLength - 1)!;
-      RandomBytes[0] = Data.at(Data.byteLength - 2)!;
+      RandomBytes[1] = Data[Data.byteLength - 1];
+      RandomBytes[0] = Data[Data.byteLength - 2];
       Data = Data.subarray(0, Data.byteLength - 2);
     }
     Data = AES_256_CTR_HMAC_SHA256_D(Data, key, RandomBytes, AdvancedEncObj);
