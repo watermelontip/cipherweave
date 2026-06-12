@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {
@@ -14,8 +16,7 @@
     --color-border: #1e293b;
   }
   body {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply antialiased;
     background-color: var(--color-bg);
     color: var(--color-text);
     transition: background-color 0.3s, color 0.3s;
@@ -32,8 +33,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
+  @apply rounded-full bg-white/10;
 }
 
 textarea {
