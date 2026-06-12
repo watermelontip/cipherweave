@@ -72,8 +72,12 @@ function App() {
         const result = Enc(inputBytes, key, wenyanConfig, advancedConfig);
         setOutput(result);
       } else {
-        const result = Dec(input, key);
-        setOutput(result);
+        try {
+          const result = Dec(input, key);
+          setOutput(result);
+        } catch (decErr: any) {
+          setError('解密失败: ' + (decErr.message || '未知错误'));
+        }
       }
     } catch (err: any) {
       setError(err.message || '处理失败，请检查输入和密钥');

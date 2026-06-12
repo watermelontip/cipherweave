@@ -130,7 +130,6 @@ export function Dec(
   TOTPBaseKey?: string | null
 ): string {
   let WenyanSimulatorObj = new WenyanSimulator(key);
-
   // Decode Chinese characters to Base64
   let OriginStr = WenyanSimulatorObj.deMap(input);
 
@@ -146,7 +145,12 @@ export function Dec(
   // Add padding
   OriginStr = AddPadding(OriginStr);
 
-  let OriginalData = Base64.toUint8Array(OriginStr);
+  let OriginalData: Uint8Array;
+  try {
+    OriginalData = Base64.toUint8Array(OriginStr);
+  } catch (b64Err: any) {
+    throw new Error('Base64解码失败(deMap长度=' + OriginStr.length + '): ' + OriginStr.substring(0, 30));
+  }
 
   if (AdvancedMarker) {
     // Extract advanced config byte
