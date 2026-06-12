@@ -297,7 +297,7 @@ export function Decrypt(Data: Uint8Array, key: string, AdvancedEncObj: AdvancedE
     if (AdvancedEncObj.UseStrongIV) {
       RandomBytes = new Array(16);
       for (let i = 0; i < 16; i++) {
-        RandomBytes[15 - i] = Data.at(Data.byteLength - 1 - i)!;
+        RandomBytes[15 - i] = Data[Data.byteLength - 1 - i];
       }
       Data = Data.subarray(0, Data.byteLength - 16);
     } else {
