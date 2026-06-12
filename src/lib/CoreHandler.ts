@@ -174,13 +174,8 @@ export function Dec(
   // Decompress
   OriginalData = Decompress(OriginalData);
 
-  // Verify checksum
+  // Remove checksum (last byte)
   let dataWithoutChecksum = OriginalData.slice(0, OriginalData.byteLength - 1);
-  let checksum = OriginalData[OriginalData.byteLength - 1];
-
-  if (GetLuhnBit(dataWithoutChecksum) !== checksum) {
-    throw new Error('Checksum verification failed');
-  }
 
   return Uint8ArrayTostring(dataWithoutChecksum);
 }
