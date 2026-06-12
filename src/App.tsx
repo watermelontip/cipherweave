@@ -72,10 +72,18 @@ function App() {
         const result = Enc(inputBytes, key, wenyanConfig, advancedConfig);
         setOutput(result);
       } else {
-        console.log('DEC: input=', input.substring(0, 20), 'key=', key);
-        const result = Dec(input, key);
-        console.log('DEC: result=', result);
-        setOutput(result);
+        // DEBUG: expose Dec for testing
+        (window as any).__testDec = Dec;
+        (window as any).__testInput = input;
+        console.log('[CW] Dec called with input length:', input.length);
+        try {
+          const result = Dec(input, key);
+          console.log('[CW] Dec result:', result.substring(0, 50));
+          setOutput(result);
+        } catch (decErr: any) {
+          console.error('[CW] Dec error:', decErr.message, decErr.stack);
+          throw decErr;
+        }
       }
     } catch (err: any) {
       setError(err.message || '处理失败，请检查输入和密钥');
