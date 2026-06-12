@@ -150,6 +150,9 @@ export class WenyanSimulator {
       }
     }
 
+    // DEBUG: log intermediate values
+    console.log('[CW-DEBUG] filtered:', filteredStr.length, 'decoded:', result.length);
+
     // Add padding to make valid Base64
     result = AddPadding(result);
 
