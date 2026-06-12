@@ -133,7 +133,6 @@ export function Dec(
 
   // Decode Chinese characters to Base64
   let OriginStr = WenyanSimulatorObj.deMap(input);
-  console.log('Dec: deMap result=', OriginStr, 'len=', OriginStr.length);
 
   // Check for advanced encryption marker
   let AdvancedMarker = false;
@@ -147,7 +146,12 @@ export function Dec(
   // Add padding
   OriginStr = AddPadding(OriginStr);
 
-  let OriginalData = Base64.toUint8Array(OriginStr);
+  let OriginalData: Uint8Array;
+  try {
+    OriginalData = Base64.toUint8Array(OriginStr);
+  } catch (b64Err: any) {
+    throw new Error('解密失败: deMap=' + OriginStr.length + '字符, 内容=' + OriginStr.substring(0, 30));
+  }
 
   if (AdvancedMarker) {
     let configByte = OriginalData[OriginalData.byteLength - 1];
