@@ -72,7 +72,9 @@ function App() {
         const result = Enc(inputBytes, key, wenyanConfig, advancedConfig);
         setOutput(result);
       } else {
+        console.log('DEC: input=', input.substring(0, 20), 'key=', key);
         const result = Dec(input, key);
+        console.log('DEC: result=', result);
         setOutput(result);
       }
     } catch (err: any) {

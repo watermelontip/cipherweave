@@ -133,6 +133,7 @@ export function Dec(
 
   // Decode Chinese characters to Base64
   let OriginStr = WenyanSimulatorObj.deMap(input);
+  console.log('Dec: deMap result=', OriginStr, 'len=', OriginStr.length);
 
   // Check for advanced encryption marker
   let AdvancedMarker = false;
