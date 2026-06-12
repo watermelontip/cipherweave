@@ -150,7 +150,12 @@ export function Dec(
   try {
     OriginalData = Base64.toUint8Array(OriginStr);
   } catch (b64Err: any) {
-    throw new Error('解密失败: deMap=' + OriginStr.length + '字符, 内容=' + OriginStr.substring(0, 30));
+    throw new Error('Base64解码失败: ' + OriginStr.length + '字符 "' + OriginStr.substring(0, 20) + '"');
+  }
+
+  // Decompress result length check
+  if (OriginalData.byteLength < 4) {
+    throw new Error('解密数据太短: ' + OriginalData.byteLength + '字节, Base64=' + OriginStr);
   }
 
   if (AdvancedMarker) {
