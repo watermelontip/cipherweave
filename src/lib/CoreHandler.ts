@@ -174,7 +174,7 @@ export function Dec(
       TOTPBaseKey: TOTPBaseKey || null,
     };
   } else {
-    AdvancedEncObj = createDefaultAdvancedConfig();
+    AdvancedEncObj = null;
   }
 
   // Decrypt
