@@ -4,16 +4,17 @@
  */
 
 import { CHINESE_MAP } from './ChineseMapData';
-import { AddPadding } from './Misc';
+import * as OpenCC from 'opencc-js';
 
 export class WenyanSimulator {
   Map_Obj: any;
   LETTERS: string;
   NUMBERSYMBOL: string;
-  NULL_STR = '孎';
+  NULL_STR = '\u5B70';
   PayloadLetter: string;
-  // Reverse maps per type for decryption
   ReverseMaps: Record<string, Record<string, string>>;
+  converter_s2t: any;
+  converter_t2s: any;
 
   constructor(_key: string) {
     this.Map_Obj = CHINESE_MAP;
@@ -22,15 +23,15 @@ export class WenyanSimulator {
     this.PayloadLetter = '';
     this.ReverseMaps = {};
 
+    this.converter_s2t = OpenCC.Converter({ from: 'cn', to: 'tw' });
+    this.converter_t2s = OpenCC.Converter({ from: 'tw', to: 'cn' });
+
     this.InitDecodeTable();
   }
 
   InitDecodeTable(): void {
-    // Build reverse maps for each type
     for (const type of ['N', 'V', 'A', 'AD']) {
       this.ReverseMaps[type] = {};
-      
-      // Alphabet
       for (let i = 0; i < this.LETTERS.length; i++) {
         const letter = this.LETTERS[i];
         const mapped = this.Map_Obj['Actual'][type]['alphabet'][letter];
@@ -41,8 +42,6 @@ export class WenyanSimulator {
           }
         }
       }
-      
-      // Numbers and symbols
       for (let i = 0; i < this.NUMBERSYMBOL.length; i++) {
         const symbol = this.NUMBERSYMBOL[i];
         const mapped = this.Map_Obj['Actual'][type]['numbersymbol'][symbol];
@@ -56,31 +55,23 @@ export class WenyanSimulator {
     }
   }
 
-  getCryptText(text: string, type: string): string {
-    if (['N', 'V', 'A', 'AD'].indexOf(type) === -1) {
-      return this.NULL_STR;
-    }
-
-    // Check if it's a letter
-    if (this.LETTERS.indexOf(text) !== -1) {
-      const mapped = this.Map_Obj['Actual'][type]['alphabet'][text];
-      return mapped || this.NULL_STR;
-    }
-    
-    // Check if it's a number or symbol
-    if (this.NUMBERSYMBOL.indexOf(text) !== -1) {
-      const mapped = this.Map_Obj['Actual'][type]['numbersymbol'][text];
-      return mapped || this.NULL_STR;
-    }
-
-    return this.NULL_STR;
-  }
-
   isPayloadChar(char: string): boolean {
     return this.PayloadLetter.indexOf(char) !== -1;
   }
 
-  // Encryption mapping
+  getCryptText(text: string, type: string): string {
+    if (['N', 'V', 'A', 'AD'].indexOf(type) === -1) return this.NULL_STR;
+    if (this.LETTERS.indexOf(text) !== -1) {
+      const mapped = this.Map_Obj['Actual'][type]['alphabet'][text];
+      return mapped || this.NULL_STR;
+    }
+    if (this.NUMBERSYMBOL.indexOf(text) !== -1) {
+      const mapped = this.Map_Obj['Actual'][type]['numbersymbol'][text];
+      return mapped || this.NULL_STR;
+    }
+    return this.NULL_STR;
+  }
+
   enMap(
     OriginStr: string,
     q: boolean,
@@ -102,56 +93,59 @@ export class WenyanSimulator {
         result += mapped;
       }
 
-      // Add punctuation if enabled
       if (q) {
         if (i > 0 && (i + 1) % 7 === 0) {
-          result += '，';
+          result += '\uFF0C';
         }
         if (i > 0 && (i + 1) % 23 === 0) {
-          result += '。';
+          result += '\u3002';
         }
       }
     }
 
-    // Add ending punctuation
     if (q && result.length > 0) {
       const lastChar = result[result.length - 1];
-      if (lastChar !== '。' && lastChar !== '，') {
-        result += '。';
+      if (lastChar !== '\u3002' && lastChar !== '\uFF0C') {
+        result += '\u3002';
       }
+    }
+
+    // Convert to Traditional Chinese if requested
+    if (_t && result.length > 0) {
+      result = this.converter_s2t(result);
     }
 
     return result;
   }
 
-  // Decryption mapping - uses SAME type order as encryption
   deMap(OriginStr: string): string {
     let result = '';
 
-    // Filter out non-payload characters
+    // Convert Traditional to Simplified first for decryption
+    let inputStr = OriginStr;
+    try {
+      inputStr = this.converter_t2s(OriginStr);
+    } catch {
+      // If conversion fails, use original
+    }
+
     let filteredStr = '';
-    for (let i = 0; i < OriginStr.length; i++) {
-      const char = OriginStr[i];
+    for (let i = 0; i < inputStr.length; i++) {
+      const char = inputStr[i];
       if (this.isPayloadChar(char)) {
         filteredStr += char;
       }
     }
 
     const types = ['N', 'V', 'A', 'AD'];
-
-    // Reverse map each character using the SAME type order
     for (let i = 0; i < filteredStr.length; i++) {
       const char = filteredStr[i];
       const type = types[i % types.length];
       const origin = this.ReverseMaps[type][char];
-      
       if (origin) {
         result += origin;
       }
     }
-
-    // DEBUG: log intermediate values
-    console.log('[CW-DEBUG] filtered:', filteredStr.length, 'decoded:', result.length);
 
     return result;
   }
